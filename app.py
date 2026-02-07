@@ -4,12 +4,11 @@ from database.models import db
 from auth.register import register_user
 from auth.login import login_user
 from flask import session, redirect
-from database.models import db, User, LoginLog
 
 app = Flask(__name__)
 
-# Secret key (later we will move this to env)
-app.config["SECRET_KEY"] = "securex-secret-key"
+# Secret key (from env for stability on Render)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "securex-secret-key")
 
 # Cloud-ready DB config (Render PostgreSQL + Local SQLite fallback)
 
@@ -57,8 +56,8 @@ def logout():
     return redirect("/")
 
 
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
+with app.app_context():
+    db.create_all()
 
+if __name__ == "__main__":
     app.run(debug=True)
