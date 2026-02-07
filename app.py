@@ -30,9 +30,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 
-@app.route("/")
-def home():
-    return render_template("login.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
