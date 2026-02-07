@@ -1,27 +1,31 @@
 import bcrypt
-
-
-def hash_password(password: str) -> bytes:
-    salt = bcrypt.gensalt()
-    return bcrypt.hashpw(password.encode(), salt)
-
-
-def check_password(password: str, hashed: bytes) -> bool:
-    return bcrypt.checkpw(password.encode(), hashed)
-
-
 import re
 
 
-def is_strong_password(password: str) -> bool:
-    """
-    Minimum:
-    - 8 chars
-    - 1 uppercase
-    - 1 lowercase
-    - 1 number
-    - 1 special char
-    """
+# Hash password
+def hash_password(password):
+
+    salt = bcrypt.gensalt()
+
+    hashed = bcrypt.hashpw(
+        password.encode(),
+        salt
+    )
+
+    return hashed
+
+
+# Check password
+def check_password(password, hashed):
+
+    return bcrypt.checkpw(
+        password.encode(),
+        hashed
+    )
+
+
+# Password strength
+def is_strong_password(password):
 
     if len(password) < 8:
         return False
@@ -29,13 +33,10 @@ def is_strong_password(password: str) -> bool:
     if not re.search(r"[A-Z]", password):
         return False
 
-    if not re.search(r"[a-z]", password):
-        return False
-
     if not re.search(r"[0-9]", password):
         return False
 
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+    if not re.search(r"[!@#$%^&*]", password):
         return False
 
     return True

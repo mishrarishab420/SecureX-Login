@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register - SecureX</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-<h2>📝 Create Account</h2>
+<h2>Register</h2>
 
-<form method="POST" action="/register">
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for msg in messages %}
+      <p style="color:red;">{{ msg }}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+<form method="POST">
 
     <input type="text" name="username" placeholder="Username" required><br><br>
 
@@ -18,7 +28,9 @@
 
 </form>
 
-<p>Already have account? <a href="/">Login</a></p>
+<br>
+
+<a href="/">Back to Login</a>
 
 </body>
 </html>

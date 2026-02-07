@@ -1,23 +1,36 @@
-from flask import request, redirect, render_template, flash
-from database.models import db, User
+from flask import request, render_template, redirect, flash
+from database.models import User, db
 from auth.crypto import hash_password, is_strong_password
 
+
 def register_user():
+
     if request.method == "POST":
 
         username = request.form["username"]
         password = request.form["password"]
-        # Check password strength
-        if not is_strong_password(password):
-            return "Weak password ❌ Use uppercase, number & special char"
 
-        # Check existing user
-        existing = User.query.filter_by(username=username).first()
+
+        # Password check
+        if not is_strong_password(password):
+
+            flash("Weak password ❌ Use Upper, Number, Special Char")
+            return redirect("/register")
+
+
+        # Check user exists
+        existing = User.query.filter_by(
+            username=username
+        ).first()
 
         if existing:
-            return "Username already exists ❌"
+
+            flash("Username already exists ❌")
+            return redirect("/register")
+
 
         hashed = hash_password(password)
+
 
         user = User(
             username=username,
@@ -27,6 +40,10 @@ def register_user():
         db.session.add(user)
         db.session.commit()
 
+
+        flash("Registration successful ✅ Login now")
+
         return redirect("/")
+
 
     return render_template("register.html")
