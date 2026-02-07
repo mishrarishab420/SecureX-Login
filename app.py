@@ -1,54 +1,86 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, session
 from database.models import db
 from auth.register import register_user
 from auth.login import login_user
-from flask import session, redirect
+
 
 app = Flask(__name__)
 
-# Secret key (from env for stability on Render)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "securex-secret-key")
 
-# Cloud-ready DB config (Render PostgreSQL + Local SQLite fallback)
+# =========================
+# SECRET KEY (for sessions)
+# =========================
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY",
+    "securex-secret-key"
+)
+
+
+# =========================
+# DATABASE CONFIG
+# =========================
 
 db_url = os.environ.get("DATABASE_URL")
 
 if db_url:
-    # Fix for Render postgres URL
+
+    # Fix Render postgres URL
     if db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql://", 1)
+        db_url = db_url.replace(
+            "postgres://",
+            "postgresql://",
+            1
+        )
 
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+
 else:
-    # Local fallback
+    # Local SQLite fallback
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///instance/securex.db"
+
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+
+# Initialize DB
 db.init_app(app)
 
 
+# =========================
+# ROUTES
+# =========================
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    return register_user()
 
+# Login Page (Home)
 @app.route("/", methods=["GET", "POST"])
 def login():
+
     return login_user()
 
+
+# Register Page
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    return register_user()
+
+
+# Dashboard (Protected)
 @app.route("/dashboard")
 def dashboard():
 
+    # If not logged in → redirect to login
     if "user_id" not in session:
         return redirect("/")
 
     return render_template(
         "dashboard.html",
-        username=session["username"]
+        username=session.get("username")
     )
 
+
+# Logout
 @app.route("/logout")
 def logout():
 
@@ -56,8 +88,18 @@ def logout():
     return redirect("/")
 
 
+# =========================
+# CREATE TABLES
+# =========================
+
 with app.app_context():
     db.create_all()
 
+
+# =========================
+# RUN APP (LOCAL)
+# =========================
+
 if __name__ == "__main__":
+
     app.run(debug=True)
